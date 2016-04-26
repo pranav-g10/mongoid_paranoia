@@ -6,7 +6,7 @@ module Mongoid
 
       def initialize
         @paranoid_field = :deleted_at
-        @default_scope_enabled = true
+        @default_scope_enabled = false
       end
     end
   end
