@@ -47,8 +47,11 @@ module Mongoid
 
       self.paranoid = true
 
-      default_scope -> { where(deleted_at: nil) }
+      if Paranoia.configuration.default_scope_enabled
+        default_scope -> { where(deleted_at: nil) }
+      end
       scope :deleted, -> { ne(deleted_at: nil) }
+      scope :non_deleted, -> { where(deleted_at: nil) }
       define_model_callbacks :restore
       define_model_callbacks :remove
     end
