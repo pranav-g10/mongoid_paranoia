@@ -196,11 +196,29 @@ module Mongoid
       embedded? ? "#{atomic_position}.#{field}" : field
     end
 
+    def updated_at_field
+      if self.class.include? Mongoid::Timestamps::Updated::Short
+        :u_at
+      elsif self.class.include? Mongoid::Timestamps::Updated
+        :updated_at
+      else
+        nil
+      end
+    end
+
     # Update value in the collection (compatibility layer for Mongoid 4/5).
     #
     # @return [ Object ] Update result.
     def _paranoia_update(value)
       query = paranoid_collection.find(atomic_selector)
+
+      if updated_at_field
+        ut = Time.now
+        self.updated_at = ut
+        value['$set'] ||= {}
+        value['$set'].merge!(updated_at_field => ut)
+      end
+
       if Mongoid::Compatibility::Version.mongoid5?
         query.update_one(value)
       else
